@@ -1,6 +1,6 @@
 import cv2
 from fer import FER
-
+import pandas as pd
 def main():
     # Initialize the webcam
     video_capture = cv2.VideoCapture(0)
