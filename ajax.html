@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="show();">Click to show</button>
+    <br>
+    <button onclick="hide();">Click to hide</button>
+    <div id="jaadu"></div>
+    <code>
+        import java.util.*;
+    </code>
+    <script>
+        function show()
+        {
+            var req = new XMLHttpRequest();
+            req.open("GET","content.txt", false);
+            req.send(null);
+
+            var e = document.getElementById("jaadu");
+            e.innerHTML = "<marquee>"+req.responseText + "</marquee>";
+        }
+        function hide()
+        {
+            var e = document.getElementById("jaadu");
+            e.innerHTML = "";
+        }
+    </script>
+</body>
+</html>

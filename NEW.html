@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaky Bucket Algorithm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f1f1f1;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .bucket {
+            width: 150px;
+            height: 200px;
+            border: 5px solid #333;
+            border-radius: 15px;
+            position: relative;
+            background-color: #5bc0de;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .bucket-content {
+            width: 100%;
+            background-color: #7f8c8d;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: height 0.5s ease-in-out;
+        }
+
+        .incoming-packet {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            animation: fall 2s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+            100% {
+                top: 150px;
+                opacity: 0;
+            }
+        }
+
+        .overflow {
+            display: none;
+            color: white;
+            background-color: #e74c3c;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .tap {
+            position: absolute;
+            top: -30px;
+            width: 20px;
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tap-active {
+            background-color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Leaky Bucket Simulation -->
+        <div class="bucket">
+            <div class="bucket-content" id="bucketContent"></div>
+            <div class="overflow" id="overflowMessage">Bucket Overflowed!</div>
+            <div class="tap" id="tap"></div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button id="addPacketButton">Add Packet</button>
+            <button id="startLeakButton">Start Leak</button>
+            <button id="stopLeakButton">Stop Leak</button>
+        </div>
+    </div>
+
+    <script>
+        // Leaky Bucket Simulation Logic
+
+        const bucketCapacity = 100; // Maximum capacity of the bucket (in terms of height)
+        const leakRate = 5; // Leak rate (how fast the bucket leaks per second)
+        const packetSize = 10; // Size of each incoming packet
+        let bucketLevel = 0; // Current level of water in the bucket
+        let leakInterval; // Leak interval handler
+        let overflowFlag = false; // To check if overflow occurs
+        let leakActive = false; // To control if the leak is active or not
+
+        const bucketContent = document.getElementById("bucketContent");
+        const overflowMessage = document.getElementById("overflowMessage");
+        const addPacketButton = document.getElementById("addPacketButton");
+        const startLeakButton = document.getElementById("startLeakButton");
+        const stopLeakButton = document.getElementById("stopLeakButton");
+        const tap = document.getElementById("tap");
+
+        // Add incoming packets to the bucket
+        function addPacket() {
+            if (overflowFlag) return; // Prevent adding packets if the bucket overflowed
+
+            if (bucketLevel + packetSize > bucketCapacity) {
+                // Overflow condition
+                overflowFlag = true;
+                overflowMessage.style.display = "block";
+                return;
+            }
+
+            // Simulate packet falling into the bucket
+            bucketLevel += packetSize;
+            updateBucketContent();
+        }
+
+        // Update bucket level
+        function updateBucketContent() {
+            const height = (bucketLevel / bucketCapacity) * 100; // Convert level to percentage
+            bucketContent.style.height = `${height}%`;
+        }
+
+        // Start leaking from the bucket at a fixed rate
+        function startLeak() {
+            if (leakInterval) clearInterval(leakInterval); // Clear any existing leaks
+
+            leakActive = true;
+            leakInterval = setInterval(() => {
+                if (bucketLevel > 0) {
+                    bucketLevel -= leakRate;
+                    if (bucketLevel < 0) bucketLevel = 0; // Prevent negative height
+                    updateBucketContent();
+                }
+
+                if (bucketLevel === 0 && overflowFlag) {
+                    // Reset overflow flag once the bucket empties
+                    overflowFlag = false;
+                    overflowMessage.style.display = "none";
+                }
+            }, 1000);
+        }
+
+        // Stop leaking
+        function stopLeak() {
+            clearInterval(leakInterval);
+            leakActive = false;
+        }
+
+        // Handle tap to start/stop water flow
+        function handleTap() {
+            tap.classList.toggle("tap-active");
+            if (leakActive) {
+                stopLeak();
+            } else {
+                startLeak();
+            }
+        }
+
+        // Simulate the addition of a packet every time the button is clicked
+        addPacketButton.addEventListener("click", () => {
+            addPacket();
+        });
+
+        // Start the leak process
+        startLeakButton.addEventListener("click", () => {
+            startLeak();
+        });
+
+        // Stop the leak process
+        stopLeakButton.addEventListener("click", () => {
+            stopLeak();
+        });
+
+        // Randomly drop packets from above to simulate incoming data
+        setInterval(() => {
+            if (!overflowFlag) {
+                const packet = document.createElement("div");
+                packet.classList.add("incoming-packet");
+                packet.style.left = `${Math.random() * 100}%`;
+                document.body.appendChild(packet);
+
+                // Remove packet after it reaches the bucket
+                setTimeout(() => {
+                    packet.remove();
+                }, 2000);
+            }
+        }, 1500); // New packet every 1.5 seconds
+
+        // Handle tap click
+        tap.addEventListener("click", handleTap);
+
+    </script>
+
+</body>
+</html>
