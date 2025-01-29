@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "first_7a14aa0e"
+        },
+        {
+            "type": "java",
+            "name": "Laal",
+            "request": "launch",
+            "mainClass": "Laal",
+            "projectName": "first_7a14aa0e"
+        },
+        {
+            "type": "java",
+            "name": "LL",
+            "request": "launch",
+            "mainClass": "LL",
+            "projectName": "first_7a14aa0e"
+        },
+        {
+            "type": "java",
             "name": "vector",
             "request": "launch",
             "mainClass": "vector",
